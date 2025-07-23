@@ -26,6 +26,7 @@ void InputSystem::update(ECS &ecs, GameManager &gameManager, float deltaTime)
         for (auto &[entityID, playerTag] : playerEntities)
         {
             auto *velocity = ecs.getComponent<Velocity>(entityID);
+            auto *movementDir = ecs.getComponent<MovementDirection>(entityID);
             if (!velocity)
                 continue;
 
@@ -33,22 +34,48 @@ void InputSystem::update(ECS &ecs, GameManager &gameManager, float deltaTime)
             velocity->x = 0;
             velocity->y = 0;
 
+            // Track which directions are pressed
+            bool movingHorizontal = false;
+            bool movingVertical = false;
+
             // Update velocity based on input
             if (keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_A])
             {
                 velocity->x = -1.0f;
+                movingHorizontal = true;
             }
             if (keyboardState[SDL_SCANCODE_RIGHT] || keyboardState[SDL_SCANCODE_D])
             {
                 velocity->x = 1.0f;
+                movingHorizontal = true;
             }
             if (keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W])
             {
                 velocity->y = -1.0f;
+                movingVertical = true;
             }
             if (keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S])
             {
                 velocity->y = 1.0f;
+                movingVertical = true;
+            }
+
+            // Set movement direction for sprite selection
+            if (movementDir && (movingHorizontal || movingVertical))
+            {
+                if (movingHorizontal && !movingVertical)
+                {
+                    movementDir->direction = MovementDirection::HORIZONTAL;
+                }
+                else if (movingVertical && !movingHorizontal)
+                {
+                    movementDir->direction = MovementDirection::VERTICAL;
+                }
+                // For diagonal movement, prioritize horizontal sprite
+                else if (movingHorizontal && movingVertical)
+                {
+                    movementDir->direction = MovementDirection::HORIZONTAL;
+                }
             }
 
             // Normalize diagonal movement

@@ -8,10 +8,10 @@
 #include "AnimationSystem.h"
 #include "RenderSystem.h"
 #include "AudioSystem.h"
+#include "MobSpawningSystem.h"
+#include "CollisionSystem.h"
+#include "BoundarySystem.h"
 
-// Forward declarations for systems not yet implemented will be added in Phase 3
-// class MobSpawningSystem;
-// class CollisionSystem;
-// class BoundarySystem;
+// Forward declarations for systems not yet implemented will be added in Phase 4
 // class HudSystem;
 // class CleanupSystem;

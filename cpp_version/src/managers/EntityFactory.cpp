@@ -44,8 +44,11 @@ EntityID EntityFactory::createPlayer(ECS &ecs)
     // Add Velocity component (starts at zero)
     ecs.addComponent(playerID, Velocity(0, 0));
 
-    // Add Sprite component
-    Sprite sprite = createSpriteFromJSON(playerConfig["sprite"]);
+    // Add MovementDirection component (starts with horizontal)
+    ecs.addComponent(playerID, MovementDirection(MovementDirection::HORIZONTAL));
+
+    // Add Sprite component (start with horizontal sprite)
+    Sprite sprite = createSpriteFromJSON(playerConfig["sprites"]["horizontal"]);
     ecs.addComponent(playerID, sprite);
 
     // Add Collider component

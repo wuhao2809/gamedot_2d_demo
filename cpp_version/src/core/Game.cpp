@@ -45,6 +45,12 @@ bool Game::initialize()
     movementSystem = std::make_unique<MovementSystem>();
     animationSystem = std::make_unique<AnimationSystem>();
     audioSystem = std::make_unique<AudioSystem>();
+    mobSpawningSystem = std::make_unique<MobSpawningSystem>(entityFactory.get(),
+                                                            gameManager.screenWidth,
+                                                            gameManager.screenHeight);
+    collisionSystem = std::make_unique<CollisionSystem>(audioSystem.get());
+    boundarySystem = std::make_unique<BoundarySystem>(gameManager.screenWidth,
+                                                      gameManager.screenHeight);
     renderSystem = std::make_unique<RenderSystem>(renderer, resourceManager.get());
 
     // Initialize audio system
@@ -230,8 +236,14 @@ void Game::gameLoop()
         // Update game time and score
         gameManager.updateGameTime(deltaTime);
 
-        // TODO: Add mob spawning, collision detection, boundary checking
+        // Phase 3: Enhanced gameplay systems
+        mobSpawningSystem->update(ecs, gameManager, deltaTime);
+        collisionSystem->update(ecs, gameManager, deltaTime);
+        boundarySystem->update(ecs, gameManager, deltaTime);
     }
+
+    // Always update boundary system to keep player in bounds
+    boundarySystem->update(ecs, gameManager, deltaTime);
 
     // 4. Update UI (update text content)
     updateUI();

@@ -32,16 +32,14 @@ private:
     std::unique_ptr<MovementSystem> movementSystem;
     std::unique_ptr<AnimationSystem> animationSystem;
     std::unique_ptr<AudioSystem> audioSystem;
+    std::unique_ptr<MobSpawningSystem> mobSpawningSystem;
+    std::unique_ptr<CollisionSystem> collisionSystem;
+    std::unique_ptr<BoundarySystem> boundarySystem;
     std::unique_ptr<RenderSystem> renderSystem;
 
-    // TODO: Systems to be implemented in Phase 3
-    // std::unique_ptr<MobSpawningSystem> mobSpawningSystem;
-    // std::unique_ptr<CollisionSystem> collisionSystem;
-    // std::unique_ptr<BoundarySystem> boundarySystem;
+    // TODO: Systems to be implemented in Phase 4
     // std::unique_ptr<HudSystem> hudSystem;
-    // std::unique_ptr<CleanupSystem> cleanupSystem;
-
-    // Entity IDs
+    // std::unique_ptr<CleanupSystem> cleanupSystem;    // Entity IDs
     EntityID playerEntityID;
 
 public:

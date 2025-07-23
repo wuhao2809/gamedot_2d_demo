@@ -1,26 +1,16 @@
 {
   "player": {
-    "sprites": {
-      "horizontal": {
-        "texture": "art/playerGrey_walk1.png",
-        "width": 65,
-        "height": 65,
-        "frameCount": 2,
-        "frameTime": 0.1,
-        "animated": true
-      },
-      "vertical": {
-        "texture": "art/playerGrey_up1.png",
-        "width": 65,
-        "height": 65,
-        "frameCount": 2,
-        "frameTime": 0.1,
-        "animated": true
-      }
+    "sprite": {
+      "texture": "art/playerGrey_walk1.png",
+      "width": 50,
+      "height": 50,
+      "frameCount": 2,
+      "frameTime": 0.1,
+      "animated": true
     },
     "collider": {
-      "width": 55,
-      "height": 55,
+      "width": 40,
+      "height": 40,
       "isTrigger": false
     },
     "speed": 400.0,
@@ -30,15 +20,15 @@
     "flying": {
       "sprite": {
         "texture": "art/enemyFlyingAlt_1.png",
-        "width": 60,
-        "height": 60,
+        "width": 50,
+        "height": 50,
         "frameCount": 2,
         "frameTime": 0.1,
         "animated": true
       },
       "collider": {
-        "width": 50,
-        "height": 50,
+        "width": 40,
+        "height": 40,
         "isTrigger": false
       },
       "speedRange": { "min": 80.0, "max": 120.0 }
@@ -46,15 +36,15 @@
     "swimming": {
       "sprite": {
         "texture": "art/enemySwimming_1.png",
-        "width": 60,
-        "height": 60,
+        "width": 50,
+        "height": 50,
         "frameCount": 2,
         "frameTime": 0.1,
         "animated": true
       },
       "collider": {
-        "width": 50,
-        "height": 50,
+        "width": 40,
+        "height": 40,
         "isTrigger": false
       },
       "speedRange": { "min": 60.0, "max": 100.0 }
@@ -62,15 +52,15 @@
     "walking": {
       "sprite": {
         "texture": "art/enemyWalking_1.png",
-        "width": 60,
-        "height": 60,
+        "width": 50,
+        "height": 50,
         "frameCount": 2,
         "frameTime": 0.1,
         "animated": true
       },
       "collider": {
-        "width": 50,
-        "height": 50,
+        "width": 40,
+        "height": 40,
         "isTrigger": false
       },
       "speedRange": { "min": 50.0, "max": 90.0 }
