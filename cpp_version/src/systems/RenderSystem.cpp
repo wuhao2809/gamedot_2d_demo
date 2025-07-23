@@ -1,6 +1,7 @@
 #include "RenderSystem.h"
 #include "../components/Components.h"
 #include "../managers/ResourceManager.h"
+#include <sstream>
 
 RenderSystem::RenderSystem(SDL_Renderer *renderer, ResourceManager *rm)
     : renderer(renderer), resourceManager(rm) {}
@@ -33,42 +34,67 @@ void RenderSystem::renderSprites(ECS &ecs)
 
         if (sprite)
         {
-            // Load texture if not already loaded
-            if (!sprite->texture && entityType)
-            {
-                std::string texturePath;
+            std::string texturePath;
+            bool needsTextureReload = false;
 
-                // Determine texture path based on entity type
-                if (entityType->type == "player")
+            // Determine texture path based on entity type
+            if (entityType && entityType->type == "player")
+            {
+                // For player entities, check movement direction and animation frame
+                auto *movementDir = ecs.getComponent<MovementDirection>(entityID);
+                int frameNumber = 1; // Default to frame 1
+
+                // Get current animation frame
+                if (animation && sprite->animated && sprite->frameCount > 1)
                 {
-                    // For player entities, check movement direction to select appropriate sprite
-                    auto *movementDir = ecs.getComponent<MovementDirection>(entityID);
-                    if (movementDir && movementDir->direction == MovementDirection::VERTICAL)
-                    {
-                        texturePath = "art/playerGrey_up1.png";
-                    }
-                    else
-                    {
-                        texturePath = "art/playerGrey_walk1.png";
-                    }
+                    frameNumber = (animation->currentFrame % sprite->frameCount) + 1;
                 }
-                else if (entityType->type == "flying")
+
+                if (movementDir && movementDir->direction == MovementDirection::VERTICAL)
                 {
-                    texturePath = "art/enemyFlyingAlt_1.png";
+                    texturePath = "art/playerGrey_up" + std::to_string(frameNumber) + ".png";
+                }
+                else
+                {
+                    texturePath = "art/playerGrey_walk" + std::to_string(frameNumber) + ".png";
+                }
+
+                // Always reload texture for player to handle animation and direction changes
+                needsTextureReload = true;
+            }
+            else if (entityType)
+            {
+                // For non-player entities, handle individual frame files
+                int frameNumber = 1; // Default to frame 1
+
+                // Get current animation frame
+                if (animation && sprite->animated && sprite->frameCount > 1)
+                {
+                    frameNumber = (animation->currentFrame % sprite->frameCount) + 1;
+                }
+
+                if (entityType->type == "flying")
+                {
+                    texturePath = "art/enemyFlyingAlt_" + std::to_string(frameNumber) + ".png";
                 }
                 else if (entityType->type == "swimming")
                 {
-                    texturePath = "art/enemySwimming_1.png";
+                    texturePath = "art/enemySwimming_" + std::to_string(frameNumber) + ".png";
                 }
                 else if (entityType->type == "walking")
                 {
-                    texturePath = "art/enemyWalking_1.png";
+                    texturePath = "art/enemyWalking_" + std::to_string(frameNumber) + ".png";
                 }
 
-                if (!texturePath.empty())
-                {
-                    sprite->texture = resourceManager->loadTexture(texturePath);
-                }
+                // Always reload texture to handle animation changes
+                needsTextureReload = true;
+            }
+
+            // Load or reload texture if needed
+            if (needsTextureReload && !texturePath.empty())
+            {
+                sprite->texture = resourceManager->loadTexture(texturePath);
+                sprite->currentTexturePath = texturePath;
             }
 
             if (sprite->texture)
@@ -83,21 +109,9 @@ void RenderSystem::renderSprites(ECS &ecs)
                     sprite->width,
                     sprite->height};
 
-                // Source rectangle should use the actual texture dimensions
-                int frameWidth = textureWidth;
-                if (sprite->animated && sprite->frameCount > 1)
-                {
-                    frameWidth = textureWidth / sprite->frameCount;
-                }
-
-                SDL_Rect srcRect = {0, 0, frameWidth, textureHeight};
-
-                // Handle animation frames
-                if (animation && sprite->animated && sprite->frameCount > 1)
-                {
-                    srcRect.x = (animation->currentFrame % sprite->frameCount) * frameWidth;
-                }
-
+                // Source rectangle should use the full texture
+                // (all sprites are individual frame files, not sprite sheets)
+                SDL_Rect srcRect = {0, 0, textureWidth, textureHeight};
                 SDL_RenderCopy(renderer, sprite->texture, &srcRect, &destRect);
             }
         }
@@ -123,24 +137,104 @@ void RenderSystem::renderUI(ECS &ecs, GameManager &gameManager, float fps)
 
         if (font)
         {
-            // Create text texture
-            SDL_Texture *textTexture = resourceManager->createTextTexture(
-                uiText->content, font, uiText->color);
-
-            if (textTexture)
+            // Check if this is the gameMessage and needs text wrapping
+            auto *entityType = ecs.getComponent<EntityType>(entityID);
+            if (entityType && entityType->type == "gameMessage")
             {
-                int textWidth, textHeight;
-                SDL_QueryTexture(textTexture, nullptr, nullptr, &textWidth, &textHeight);
+                // Use text wrapping for game message (max width: 400 pixels)
+                std::vector<std::string> lines = wrapText(uiText->content, font, 400);
 
-                SDL_Rect destRect = {
-                    static_cast<int>(uiPos.x),
-                    static_cast<int>(uiPos.y),
-                    textWidth,
-                    textHeight};
+                // Calculate total height for centering
+                int lineHeight;
+                TTF_SizeText(font, "A", nullptr, &lineHeight);
+                int totalHeight = lines.size() * lineHeight;
 
-                SDL_RenderCopy(renderer, textTexture, nullptr, &destRect);
-                SDL_DestroyTexture(textTexture);
+                // Start position (centered vertically)
+                float startY = uiPos.y - totalHeight / 2.0f;
+
+                for (size_t i = 0; i < lines.size(); ++i)
+                {
+                    SDL_Texture *lineTexture = resourceManager->createTextTexture(
+                        lines[i], font, uiText->color);
+
+                    if (lineTexture)
+                    {
+                        int lineWidth, lineHeightActual;
+                        SDL_QueryTexture(lineTexture, nullptr, nullptr, &lineWidth, &lineHeightActual);
+
+                        SDL_Rect destRect = {
+                            static_cast<int>(uiPos.x - lineWidth / 2),
+                            static_cast<int>(startY + i * lineHeight),
+                            lineWidth,
+                            lineHeightActual};
+
+                        SDL_RenderCopy(renderer, lineTexture, nullptr, &destRect);
+                        SDL_DestroyTexture(lineTexture);
+                    }
+                }
+            }
+            else
+            {
+                // Single line rendering for other UI elements
+                SDL_Texture *textTexture = resourceManager->createTextTexture(
+                    uiText->content, font, uiText->color);
+
+                if (textTexture)
+                {
+                    int textWidth, textHeight;
+                    SDL_QueryTexture(textTexture, nullptr, nullptr, &textWidth, &textHeight);
+
+                    SDL_Rect destRect = {
+                        static_cast<int>(uiPos.x),
+                        static_cast<int>(uiPos.y),
+                        textWidth,
+                        textHeight};
+
+                    SDL_RenderCopy(renderer, textTexture, nullptr, &destRect);
+                    SDL_DestroyTexture(textTexture);
+                }
             }
         }
     }
+}
+
+std::vector<std::string> RenderSystem::wrapText(const std::string &text, TTF_Font *font, int maxWidth)
+{
+    std::vector<std::string> lines;
+    std::istringstream words(text);
+    std::string word;
+    std::string currentLine;
+
+    while (words >> word)
+    {
+        std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
+
+        int textWidth;
+        TTF_SizeText(font, testLine.c_str(), &textWidth, nullptr);
+
+        if (textWidth <= maxWidth)
+        {
+            currentLine = testLine;
+        }
+        else
+        {
+            if (!currentLine.empty())
+            {
+                lines.push_back(currentLine);
+                currentLine = word;
+            }
+            else
+            {
+                // Single word is too long, add it anyway
+                lines.push_back(word);
+            }
+        }
+    }
+
+    if (!currentLine.empty())
+    {
+        lines.push_back(currentLine);
+    }
+
+    return lines;
 }

@@ -27,9 +27,10 @@ struct Sprite
     int frameCount;
     float frameTime;
     bool animated;
+    std::string currentTexturePath; // Track currently loaded texture
 
     Sprite(SDL_Texture *tex = nullptr, int w = 0, int h = 0, int frames = 1, float fTime = 0.1f)
-        : texture(tex), width(w), height(h), frameCount(frames), frameTime(fTime), animated(frames > 1) {}
+        : texture(tex), width(w), height(h), frameCount(frames), frameTime(fTime), animated(frames > 1), currentTexturePath("") {}
 };
 
 struct Collider

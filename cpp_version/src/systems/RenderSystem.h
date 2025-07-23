@@ -2,6 +2,8 @@
 #include "System.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <vector>
+#include <string>
 
 class ResourceManager; // Forward declaration
 
@@ -18,4 +20,5 @@ public:
 private:
     void renderSprites(ECS &ecs);
     void renderUI(ECS &ecs, GameManager &gameManager, float fps);
+    std::vector<std::string> wrapText(const std::string &text, TTF_Font *font, int maxWidth);
 };

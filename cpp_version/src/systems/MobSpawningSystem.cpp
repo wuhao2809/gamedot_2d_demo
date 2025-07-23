@@ -93,18 +93,18 @@ void MobSpawningSystem::spawnMob(ECS &ecs)
     collider.isTrigger = colliderConfig["isTrigger"].get<bool>();
     ecs.addComponent(mobEntity, collider);
 
-    // Create Velocity component (move left with random speed)
+    // Create Velocity component (normalized direction vector)
+    Velocity velocity;
+    velocity.x = -1.0f; // Move left (normalized direction)
+    velocity.y = 0.0f;
+    ecs.addComponent(mobEntity, velocity);
+
+    // Create Speed component (random speed within range)
     json speedRange = mobConfig["speedRange"];
     float minSpeed = speedRange["min"].get<float>();
     float maxSpeed = speedRange["max"].get<float>();
     float speed = minSpeed + speedDistribution(randomGenerator) * (maxSpeed - minSpeed);
 
-    Velocity velocity;
-    velocity.x = -speed; // Move left
-    velocity.y = 0.0f;
-    ecs.addComponent(mobEntity, velocity);
-
-    // Create Speed component
     Speed speedComponent;
     speedComponent.value = speed;
     ecs.addComponent(mobEntity, speedComponent);
