@@ -56,9 +56,43 @@ void MobSpawningSystem::spawnMob(ECS &ecs)
     // Add EntityType component for texture identification
     ecs.addComponent(mobEntity, EntityType{mobType});
 
-    // Determine spawn position (always spawn from the right side)
-    float spawnX = screenWidth + 50.0f;                                                     // Start off-screen to the right
-    float spawnY = positionDistribution(randomGenerator) * (screenHeight - 100.0f) + 50.0f; // Random Y within screen bounds
+    // Determine spawn edge and direction randomly
+    int edge = std::uniform_int_distribution<int>(0, 3)(randomGenerator); // 0=right, 1=left, 2=top, 3=bottom
+    float spawnX, spawnY;
+    Velocity velocity;
+    MovementDirection::Direction facingDirection;
+
+    switch (edge)
+    {
+    case 0: // Spawn from right edge, move left
+        spawnX = screenWidth + 50.0f;
+        spawnY = positionDistribution(randomGenerator) * (screenHeight - 100.0f) + 50.0f;
+        velocity.x = -1.0f;
+        velocity.y = 0.0f;
+        facingDirection = MovementDirection::HORIZONTAL;
+        break;
+    case 1: // Spawn from left edge, move right
+        spawnX = -50.0f;
+        spawnY = positionDistribution(randomGenerator) * (screenHeight - 100.0f) + 50.0f;
+        velocity.x = 1.0f;
+        velocity.y = 0.0f;
+        facingDirection = MovementDirection::HORIZONTAL;
+        break;
+    case 2: // Spawn from top edge, move down
+        spawnX = positionDistribution(randomGenerator) * (screenWidth - 100.0f) + 50.0f;
+        spawnY = -50.0f;
+        velocity.x = 0.0f;
+        velocity.y = 1.0f;
+        facingDirection = MovementDirection::VERTICAL;
+        break;
+    case 3: // Spawn from bottom edge, move up
+        spawnX = positionDistribution(randomGenerator) * (screenWidth - 100.0f) + 50.0f;
+        spawnY = screenHeight + 50.0f;
+        velocity.x = 0.0f;
+        velocity.y = -1.0f;
+        facingDirection = MovementDirection::VERTICAL;
+        break;
+    }
 
     // Create Transform component
     Transform transform;
@@ -66,6 +100,9 @@ void MobSpawningSystem::spawnMob(ECS &ecs)
     transform.y = spawnY;
     transform.rotation = 0.0f;
     ecs.addComponent(mobEntity, transform);
+
+    // Add MovementDirection component for proper sprite orientation
+    ecs.addComponent(mobEntity, MovementDirection(facingDirection));
 
     // Create Sprite component
     json spriteConfig = mobConfig["sprite"];
@@ -93,10 +130,7 @@ void MobSpawningSystem::spawnMob(ECS &ecs)
     collider.isTrigger = colliderConfig["isTrigger"].get<bool>();
     ecs.addComponent(mobEntity, collider);
 
-    // Create Velocity component (normalized direction vector)
-    Velocity velocity;
-    velocity.x = -1.0f; // Move left (normalized direction)
-    velocity.y = 0.0f;
+    // Use the calculated velocity from spawn logic
     ecs.addComponent(mobEntity, velocity);
 
     // Create Speed component (random speed within range)

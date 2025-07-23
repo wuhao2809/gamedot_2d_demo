@@ -1,5 +1,6 @@
 #include "InputSystem.h"
 #include "../components/Components.h"
+#include <vector>
 
 InputSystem::InputSystem()
 {
@@ -14,6 +15,8 @@ void InputSystem::update(ECS &ecs, GameManager &gameManager, float deltaTime)
         if (gameManager.currentState == GameManager::MENU ||
             gameManager.currentState == GameManager::GAME_OVER)
         {
+            // Clear all existing mobs before starting new game
+            clearAllMobs(ecs);
             gameManager.startGame();
         }
     }
@@ -85,5 +88,24 @@ void InputSystem::update(ECS &ecs, GameManager &gameManager, float deltaTime)
                 velocity->y *= 0.707f;
             }
         }
+    }
+}
+
+void InputSystem::clearAllMobs(ECS &ecs)
+{
+    // Get all entities with MobTag and remove them
+    auto &mobTags = ecs.getComponents<MobTag>();
+    std::vector<EntityID> mobsToRemove;
+
+    // Collect all mob entity IDs
+    for (auto &[entityID, mobTag] : mobTags)
+    {
+        mobsToRemove.push_back(entityID);
+    }
+
+    // Remove all mob entities
+    for (EntityID mobID : mobsToRemove)
+    {
+        ecs.removeEntity(mobID);
     }
 }

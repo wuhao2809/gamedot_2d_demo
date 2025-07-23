@@ -6,6 +6,7 @@ class InputSystem : public System
 {
 private:
     const Uint8 *keyboardState;
+    void clearAllMobs(ECS &ecs);
 
 public:
     InputSystem();

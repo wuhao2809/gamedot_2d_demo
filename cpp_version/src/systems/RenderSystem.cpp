@@ -42,6 +42,7 @@ void RenderSystem::renderSprites(ECS &ecs)
             {
                 // For player entities, check movement direction and animation frame
                 auto *movementDir = ecs.getComponent<MovementDirection>(entityID);
+                auto *velocity = ecs.getComponent<Velocity>(entityID);
                 int frameNumber = 1; // Default to frame 1
 
                 // Get current animation frame
@@ -62,9 +63,9 @@ void RenderSystem::renderSprites(ECS &ecs)
                 // Always reload texture for player to handle animation and direction changes
                 needsTextureReload = true;
             }
-            else if (entityType)
+            else if (entityType && (entityType->type == "flying" || entityType->type == "swimming" || entityType->type == "walking"))
             {
-                // For non-player entities, handle individual frame files
+                // For mob entities, handle individual frame files and direction
                 int frameNumber = 1; // Default to frame 1
 
                 // Get current animation frame
@@ -88,9 +89,7 @@ void RenderSystem::renderSprites(ECS &ecs)
 
                 // Always reload texture to handle animation changes
                 needsTextureReload = true;
-            }
-
-            // Load or reload texture if needed
+            } // Load or reload texture if needed
             if (needsTextureReload && !texturePath.empty())
             {
                 sprite->texture = resourceManager->loadTexture(texturePath);
@@ -112,7 +111,42 @@ void RenderSystem::renderSprites(ECS &ecs)
                 // Source rectangle should use the full texture
                 // (all sprites are individual frame files, not sprite sheets)
                 SDL_Rect srcRect = {0, 0, textureWidth, textureHeight};
-                SDL_RenderCopy(renderer, sprite->texture, &srcRect, &destRect);
+
+                // Determine sprite flipping based on entity type and movement direction
+                SDL_RendererFlip flipFlags = SDL_FLIP_NONE;
+                auto *velocity = ecs.getComponent<Velocity>(entityID);
+
+                if (entityType && entityType->type == "player" && velocity)
+                {
+                    // Flip player sprite vertically when moving down
+                    auto *movementDir = ecs.getComponent<MovementDirection>(entityID);
+                    if (movementDir && movementDir->direction == MovementDirection::VERTICAL && velocity->y > 0)
+                    {
+                        flipFlags = SDL_FLIP_VERTICAL;
+                    }
+                }
+                else if (entityType && (entityType->type == "flying" || entityType->type == "swimming" || entityType->type == "walking") && velocity)
+                {
+                    // Flip mob sprites based on movement direction
+                    auto *movementDir = ecs.getComponent<MovementDirection>(entityID);
+                    if (movementDir)
+                    {
+                        if (movementDir->direction == MovementDirection::HORIZONTAL && velocity->x < 0)
+                        {
+                            flipFlags = SDL_FLIP_HORIZONTAL; // Flip when moving left (since sprites face right by default)
+                        }
+                        else if (movementDir->direction == MovementDirection::VERTICAL)
+                        {
+                            if (velocity->y < 0)
+                            {
+                                flipFlags = SDL_FLIP_VERTICAL; // Flip when moving up
+                            }
+                            // When moving down (velocity->y > 0), use normal orientation (no flip)
+                        }
+                    }
+                }
+
+                SDL_RenderCopyEx(renderer, sprite->texture, &srcRect, &destRect, 0.0, nullptr, flipFlags);
             }
         }
     }
