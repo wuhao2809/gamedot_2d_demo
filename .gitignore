@@ -1,0 +1,95 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+.import/
+export.cfg
+export_presets.cfg
+*.tmp
+
+# C++ Build directories and files
+build/
+bin/
+obj/
+out/
+Release/
+Debug/
+
+# C++ compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.pdb
+*.ilk
+*.exp
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# IDE and editor files
+.vscode/
+.vs/
+*.swp
+*.swo
+*~
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Operating System files
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.cache
+*.pid
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Debug and profiling files
+*.dSYM/
+*.su
+*.idb
+*.prof
+*.gcda
+*.gcno
+
+# Package managers
+node_modules/
+*.tgz
+*.tar.gz
+
+# Generated documentation
+docs/html/
+docs/latex/
+doxygen_output/
