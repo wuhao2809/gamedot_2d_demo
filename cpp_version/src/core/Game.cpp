@@ -236,14 +236,10 @@ void Game::gameLoop()
         // Update game time and score
         gameManager.updateGameTime(deltaTime);
 
-        // Phase 3: Enhanced gameplay systems
         mobSpawningSystem->update(ecs, gameManager, deltaTime);
         collisionSystem->update(ecs, gameManager, deltaTime);
         boundarySystem->update(ecs, gameManager, deltaTime);
     }
-
-    // Always update boundary system to keep player in bounds
-    boundarySystem->update(ecs, gameManager, deltaTime);
 
     // 4. Update UI (update text content)
     updateUI();
