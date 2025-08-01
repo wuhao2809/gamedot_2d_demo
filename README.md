@@ -95,24 +95,20 @@ This comparison demonstrates:
 - **C++ ECS Advantages**: Performance optimization, architectural flexibility, educational value
 - **Trade-offs**: Development time vs. control, ease-of-use vs. customization
 
-## 🛠️ Technical Implementation Notes
+## � Documentation
 
-### C++ ECS Features
+- **[FILE_DOCUMENTATION.md](FILE_DOCUMENTATION.md)**: Detailed explanation of each file's function and purpose in the C++ ECS implementation
+- **Architecture Overview**: See the comparison table above for high-level differences between approaches
 
-- **JSON-Driven Configuration**: Entity definitions, game settings, and UI layouts
-- **Resource Management**: Texture and font loading with caching
-- **Delta Time Movement**: Frame-rate independent gameplay
-- **Multi-directional Spawning**: Enemies spawn from all four screen edges
-- **Directional Sprites**: Player and enemy sprites face movement direction
-- **Text Wrapping**: Game over messages wrap for better display
-- **Memory Management**: Proper cleanup and entity lifecycle management
+## 🛠️ Technical Highlights
 
-### Performance Optimizations
+### C++ ECS Implementation Features
 
-- Component pools for cache-friendly iteration
-- Spatial partitioning for collision detection
-- Object pooling for frequently created/destroyed entities
-- Custom systems optimized for specific game requirements
+- Pure Entity Component System architecture with data-driven design
+- JSON-based entity configuration for easy modification
+- Frame-rate independent movement and gameplay
+- Multi-directional enemy spawning with proper sprite facing
+- Custom resource management and memory optimization
 
 ---
 
